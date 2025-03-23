@@ -183,35 +183,56 @@ public class FFmpegKitFlutterPlugin implements FlutterPlugin, ActivityAware, Met
     }
 
     @Override
-    public void onAttachedToEngine(@NonNull final FlutterPluginBinding flutterPluginBinding) {
-        this.flutterPluginBinding = flutterPluginBinding;
+    public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
+        context = flutterPluginBinding.getApplicationContext();
+        methodCallHandler = new MethodCallHandlerImpl();
+        channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "ffmpeg_kit_flutter");
+        channel.setMethodCallHandler(methodCallHandler);
+
+        eventStreamHandler = new EventStreamHandlerImpl();
+        eventChannel = new EventChannel(flutterPluginBinding.getBinaryMessenger(), "ffmpeg_kit_flutter_events");
+        eventChannel.setStreamHandler(eventStreamHandler);
+
+        methodCallHandler.init(flutterPluginBinding.getBinaryMessenger(), context, null, null);
+        eventStreamHandler.init(flutterPluginBinding.getBinaryMessenger());
     }
 
     @Override
-    public void onDetachedFromEngine(@NonNull final FlutterPluginBinding binding) {
-        this.flutterPluginBinding = null;
-    }
+    public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
+        context = flutterPluginBinding.getApplicationContext();
+        methodCallHandler = new MethodCallHandlerImpl();
+        channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "ffmpeg_kit_flutter");
+        channel.setMethodCallHandler(methodCallHandler);
 
+        eventStreamHandler = new EventStreamHandlerImpl();
+        eventChannel = new EventChannel(flutterPluginBinding.getBinaryMessenger(), "ffmpeg_kit_flutter_events");
+        eventChannel.setStreamHandler(eventStreamHandler);
+
+        methodCallHandler.init(flutterPluginBinding.getBinaryMessenger(), context, null, null);
+        eventStreamHandler.init(flutterPluginBinding.getBinaryMessenger());
+    }
     @Override
-    public void onAttachedToActivity(@NonNull ActivityPluginBinding activityPluginBinding) {
-        Log.d(LIBRARY_NAME, String.format("FFmpegKitFlutterPlugin %s attached to activity %s.", this, activityPluginBinding.getActivity()));
-        init(flutterPluginBinding.getBinaryMessenger(), flutterPluginBinding.getApplicationContext(), activityPluginBinding.getActivity(), null, activityPluginBinding);
+    public void onAttachedToActivity(@NonNull ActivityPluginBinding binding) {
+        activity = binding.getActivity();
+        methodCallHandler.init(null, context, activity, binding);
     }
 
     @Override
     public void onDetachedFromActivityForConfigChanges() {
-        onDetachedFromActivity();
+        activity = null;
+        methodCallHandler.init(null, context, null, null);
     }
 
     @Override
-    public void onReattachedToActivityForConfigChanges(@NonNull ActivityPluginBinding activityPluginBinding) {
-        onAttachedToActivity(activityPluginBinding);
+    public void onReattachedToActivityForConfigChanges(@NonNull ActivityPluginBinding binding) {
+        activity = binding.getActivity();
+        methodCallHandler.init(null, context, activity, binding);
     }
 
     @Override
     public void onDetachedFromActivity() {
-        uninit();
-        Log.d(LIBRARY_NAME, "FFmpegKitFlutterPlugin detached from activity.");
+        activity = null;
+        methodCallHandler.init(null, context, null, null);
     }
 
     @Override
